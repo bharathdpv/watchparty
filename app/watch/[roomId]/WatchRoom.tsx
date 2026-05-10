@@ -29,9 +29,8 @@ export default function WatchRoom({ roomId }: Props) {
     if (role === 'host') {
       socket.emit('create-room', roomId)
       socket.on('room-created', () => {})
-    } else {
-      socket.emit('join-room', roomId)
     }
+    // viewer: join-room emitted inside ViewerView after its listeners are registered
 
     socket.on('room-error', (msg: string) => setRoomError(msg))
     socket.on('viewer-count', (count: number) => setViewerCount(count))
