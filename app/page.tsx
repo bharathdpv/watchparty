@@ -1,65 +1,89 @@
-import Image from "next/image";
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Clapperboard } from 'lucide-react'
 
 export default function Home() {
+  const router = useRouter()
+  const [joinCode, setJoinCode] = useState('')
+  const [joinError, setJoinError] = useState('')
+
+  function createRoom() {
+    const roomId = crypto.randomUUID().replace(/-/g, '').slice(0, 8)
+    sessionStorage.setItem(`role:${roomId}`, 'host')
+    router.push(`/watch/${roomId}`)
+  }
+
+  function joinRoom() {
+    const id = joinCode.trim()
+    if (!id) {
+      setJoinError('Enter a room code')
+      return
+    }
+    router.push(`/watch/${id}`)
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-8">
+        <div className="text-center space-y-2">
+          <div className="flex justify-center mb-4">
+            <div className="w-16 h-16 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-900/50">
+              <Clapperboard size={32} className="text-white" />
+            </div>
+          </div>
+          <h1 className="text-4xl font-bold text-white tracking-tight">Watch Party</h1>
+          <p className="text-zinc-400 text-sm">
+            Stream local video files in real time with friends
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        <div className="bg-zinc-900 rounded-2xl p-6 border border-zinc-800 space-y-4">
+          <div>
+            <h2 className="text-white font-semibold text-lg">Host a Party</h2>
+            <p className="text-zinc-500 text-sm mt-1">
+              Create a room and stream a video from your device
+            </p>
+          </div>
+          <button
+            onClick={createRoom}
+            className="w-full bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-semibold py-3 rounded-xl transition-colors"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            Create Room
+          </button>
         </div>
-      </main>
-    </div>
-  );
+
+        <div className="bg-zinc-900 rounded-2xl p-6 border border-zinc-800 space-y-4">
+          <div>
+            <h2 className="text-white font-semibold text-lg">Join a Party</h2>
+            <p className="text-zinc-500 text-sm mt-1">
+              Enter a room code to watch with the host
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={joinCode}
+              onChange={(e) => { setJoinCode(e.target.value); setJoinError('') }}
+              onKeyDown={(e) => e.key === 'Enter' && joinRoom()}
+              placeholder="Room code"
+              className="flex-1 bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+            />
+            <button
+              onClick={joinRoom}
+              className="bg-zinc-700 hover:bg-zinc-600 active:bg-zinc-800 text-white font-semibold px-5 py-3 rounded-xl transition-colors"
+            >
+              Join
+            </button>
+          </div>
+          {joinError && <p className="text-red-400 text-sm">{joinError}</p>}
+        </div>
+
+        <p className="text-center text-zinc-600 text-xs">
+          Video streams directly peer-to-peer — nothing is uploaded to any server
+        </p>
+      </div>
+    </main>
+  )
 }
