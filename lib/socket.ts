@@ -4,7 +4,10 @@ let socket: Socket | null = null
 
 export function getSocket(): Socket {
   if (!socket) {
-    socket = io({ autoConnect: true })
+    // In prod, NEXT_PUBLIC_SOCKET_URL points to the deployed server.
+    // In dev, omit URL → connects to same origin (localhost:3000).
+    const url = process.env.NEXT_PUBLIC_SOCKET_URL || undefined
+    socket = io(url as string, { autoConnect: true })
   }
   return socket
 }
